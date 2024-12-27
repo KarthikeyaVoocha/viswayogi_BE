@@ -43,8 +43,9 @@ class UserSignupView(APIView):
                         "role": openapi.Schema(type=openapi.TYPE_STRING, description="Role of the user"),
                         "designation": openapi.Schema(type=openapi.TYPE_STRING, description="Role of the designation"),
                         "password": openapi.Schema(type=openapi.TYPE_STRING, description="Password for the account"),
+                        "admin_key": openapi.Schema(type=openapi.TYPE_STRING, description="admin key")
                     },
-                    required=["full_name", "email_id", "password", "role", "designation"],
+                    required=["full_name", "email_id", "password", "role", "designation","admin_key"],
                 ),
             },
             required=["payload"],  # `payload` is required
@@ -81,10 +82,17 @@ class UserSignupView(APIView):
         role = payload.get('role')
         designation = payload.get('designation')
         password = payload.get('password')
+        admin_key = payload.get('admin_key')
 
         if not full_name or not email_id or not password:
             return Response(
                 {"error": "Full name, email ID, and password are required in the payload."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        if admin_key!="demo":
+            return Response(
+                {"error": "admin key incorrect."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
