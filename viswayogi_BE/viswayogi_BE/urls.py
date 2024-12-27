@@ -36,6 +36,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     # Application URLs
     path('user/', include('user_profile.urls')),
+    path('doctor/', include('doctor.urls')),
 
     # Swagger UI and Redoc URLs
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),

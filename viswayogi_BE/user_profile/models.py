@@ -17,7 +17,7 @@ class UserProfile(models.Model):
     email_id = models.EmailField(max_length=100, unique=True, null=False)
     phone_no = models.CharField(max_length=15, null=True)
     phone_code = models.CharField(default="91", max_length=10)
-    role = models.CharField(max_length=50, null=True)
+    role = models.CharField(max_length=50, null=False)
     designation = models.CharField(max_length=50, null=True)
     password = models.CharField(max_length=100, null=True)
     added_date = models.DateTimeField(auto_now_add=True)

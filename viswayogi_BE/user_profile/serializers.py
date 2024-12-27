@@ -17,6 +17,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     email_id = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+    role = serializers.CharField()
 
 
 class TokenRefreshSerializer(serializers.Serializer):

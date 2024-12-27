@@ -185,7 +185,7 @@ class UserLoginView(APIView):
             try:
                 user = UserProfile.objects.get(email_id=serializer.validated_data['email_id'])
 
-                if check_password(serializer.validated_data['password'], user.password):
+                if role==user.role and check_password(serializer.validated_data['password'], user.password):
                     refresh = RefreshToken.for_user(user)
 
                     return Response({
