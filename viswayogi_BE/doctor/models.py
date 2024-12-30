@@ -55,4 +55,4 @@ class Appointment(models.Model):
     last_modified_date = models.DateTimeField(default=datetime.now)
     
     def __str__(self):
-        return self.assignment_id
+        return self.appointment_id
