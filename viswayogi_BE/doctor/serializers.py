@@ -11,10 +11,6 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         model = PatientProfile
         fields = '__all__'
 
-class AssignDoctorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AssignDoctor
-        fields = '__all__'
 
 class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:

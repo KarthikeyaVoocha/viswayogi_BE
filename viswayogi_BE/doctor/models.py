@@ -15,7 +15,10 @@ class PatientProfileStatus(models.Model):
 class PatientProfile(models.Model):
     patient_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     full_name = models.CharField(max_length=100, null=True)
-    email_id = models.EmailField(max_length=100, unique=True, null=True)
+    email_id = models.EmailField(max_length=100, null=True)
+    Sex = models.CharField(max_length=100, null=False)
+    DOB = models.DateTimeField(default=datetime.now,null=False)
+    Health_info = models.CharField(max_length=2000, null=False) 
     phone_no = models.CharField(max_length=15, null=False, unique=True)
     phone_code = models.CharField(default="91", max_length=10)
     address = models.CharField(max_length=200, null=True)
@@ -27,27 +30,14 @@ class PatientProfile(models.Model):
         return self.patient_id
     
 
-class AssignDoctor(models.Model):
-    assignment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    patient_id = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    phone_no = models.CharField(max_length=15, null=False, unique=True)
-    phone_code = models.CharField(default="91", max_length=10)
-    health_conditon = models.CharField(max_length=2000, null=True)
-    added_date = models.DateTimeField(auto_now_add=True)
-    last_modified_date = models.DateTimeField(default=datetime.now)
-    
-    def __str__(self):
-        return self.assignment_id
-    
-
 class Appointment(models.Model):
     appointment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    assignment_id = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
-    blood_pressure = models.CharField(max_length=15, null=False, unique=True)
-    weight = models.CharField(max_length=15, null=False, unique=True)
-    body_temp = models.CharField(max_length=15, null=False, unique=True)
-    health_conditon = models.CharField(max_length=2000, null=True)
+    patient_id = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    blood_pressure = models.CharField(max_length=15, null=False)
+    weight = models.CharField(max_length=15, null=False)
+    body_temp = models.CharField(max_length=15, null=False)
+    apponitment_reason = models.CharField(max_length=2000, null=True)
     appointment_sch = models.DateTimeField(auto_now_add=True)
     ready = models.BooleanField()
     done = models.BooleanField(default=False)

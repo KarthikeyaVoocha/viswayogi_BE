@@ -34,10 +34,13 @@ class PatientRegisterView(APIView):
                     properties={
                         "full_name": openapi.Schema(type=openapi.TYPE_STRING, description="Full name of the user"),
                         "email_id": openapi.Schema(type=openapi.TYPE_STRING, description="User email address"),
+                        "sex": openapi.Schema(type=openapi.TYPE_STRING, description="sex of patient"),
+                        "dob": openapi.Schema(type=openapi.FORMAT_DATETIME, description="date of birth of patient"),
+                        "health_info": openapi.Schema(type=openapi.TYPE_STRING, description="health information"),
                         "phone_no": openapi.Schema(type=openapi.TYPE_STRING, description="Phone number"),
                         "address": openapi.Schema(type=openapi.TYPE_STRING, description="address of the patient"),
                     },
-                    required=["full_name", "email_id", "phone_no", "address"],
+                    required=["full_name", "email_id", "phone_no", "address","sex","dob","health_info"],
                 ),
             },
             required=["auth_params","payload"],  # `payload` is required
@@ -73,6 +76,9 @@ class PatientRegisterView(APIView):
         email_id = payload.get('email_id')
         phone_no = payload.get('phone_no')
         address = payload.get('address')
+        sex = payload.get('sex')
+        dob = payload.get('dob')
+        health_info = payload.get('health_info')
 
         if not full_name or not email_id:
             return Response(
@@ -86,7 +92,10 @@ class PatientRegisterView(APIView):
                 "full_name": full_name,
                 "email_id": email_id,
                 "phone_no": phone_no,
-                "address": address
+                "address": address,
+                "Sex": sex,
+                "DOB": dob,
+                "Health_info": health_info
             }
         )
         if serializer.is_valid():

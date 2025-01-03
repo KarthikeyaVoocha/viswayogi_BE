@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from .models import Appointment, AssignDoctor
+from .models import Appointment,PatientProfile
+from user_profile.models import UserProfile
 from .serializers import AppointmentSerializer
 from user_profile.decorators import authenticate_user_session
 
@@ -30,7 +31,8 @@ class BookAppointmentView(APIView):
                     type=openapi.TYPE_OBJECT,
                     description="Appointment details",
                     properties={
-                        "assignment_id": openapi.Schema(type=openapi.TYPE_STRING, description="Assignment ID"),
+                        "patient_phone": openapi.Schema(type=openapi.TYPE_STRING, description="phone number"),
+                        "doctor_id": openapi.Schema(type=openapi.TYPE_STRING, description="doctor id"),
                         "blood_pressure": openapi.Schema(type=openapi.TYPE_STRING, description="Blood pressure reading"),
                         "weight": openapi.Schema(type=openapi.TYPE_STRING, description="Weight of the patient"),
                         "body_temp": openapi.Schema(type=openapi.TYPE_STRING, description="Body temperature"),
@@ -59,7 +61,7 @@ class BookAppointmentView(APIView):
                                 "blood_pressure": openapi.Schema(type=openapi.TYPE_STRING, description="Blood pressure"),
                                 "weight": openapi.Schema(type=openapi.TYPE_STRING, description="Weight"),
                                 "body_temp": openapi.Schema(type=openapi.TYPE_STRING, description="Body temperature"),
-                                "health_condition": openapi.Schema(type=openapi.TYPE_STRING, description="Health condition"),
+                                "apponitment_reason": openapi.Schema(type=openapi.TYPE_STRING, description="Health condition"),
                                 "ready": openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Ready status"),
                                 "appointment_sch": openapi.Schema(type=openapi.FORMAT_DATETIME, description="Scheduled appointment time"),
                                 "added_date": openapi.Schema(type=openapi.FORMAT_DATETIME, description="Creation date"),
@@ -72,36 +74,46 @@ class BookAppointmentView(APIView):
         },
     )
     @authenticate_user_session
+    @authenticate_user_session
     def post(self, request):
         payload = request.data.get('payload', {})
-        assignment_id = payload.get('assignment_id')
+        patient_phone = payload.get('patient_phone')
+        doctor_id = payload.get('doctor_id')
         blood_pressure = payload.get('blood_pressure')
         weight = payload.get('weight')
         body_temp = payload.get('body_temp')
-        health_condition = payload.get('health_condition')
+        apponitment_reason = payload.get('health_condition')
         ready = payload.get('ready')
         appointment_sch = payload.get('appointment_sch')
 
-        if not all([assignment_id, blood_pressure, weight, body_temp, health_condition, ready is not None, appointment_sch]):
+        if not all([patient_phone, doctor_id, blood_pressure, weight, body_temp, apponitment_reason, ready is not None, appointment_sch]):
             return Response(
                 {"error": "All fields are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            assignment = AssignDoctor.objects.get(assignment_id=assignment_id)
-        except AssignDoctor.DoesNotExist:
+            # Assuming PatientProfile and UserProfile are linked to patient_phone and doctor_id
+            patient = PatientProfile.objects.get(phone=patient_phone)
+            doctor = UserProfile.objects.get(user_id=doctor_id)
+        except PatientProfile.DoesNotExist:
             return Response(
-                {"error": "Assignment with the given ID does not exist."},
+                {"error": "Patient with the given phone number does not exist."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except UserProfile.DoesNotExist:
+            return Response(
+                {"error": "Doctor with the given ID does not exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         appointment_data = {
-            "assignment_id": assignment_id,
+            "patient_id": patient.id,
+            "user_id": doctor.id,
             "blood_pressure": blood_pressure,
             "weight": weight,
             "body_temp": body_temp,
-            "health_conditon": health_condition,
+            "apponitment_reason": apponitment_reason,
             "ready": ready,
             "appointment_sch": appointment_sch,
         }
@@ -112,11 +124,12 @@ class BookAppointmentView(APIView):
 
             response_data = {
                 "appointment_id": str(appointment.appointment_id),
-                "assignment_id": str(appointment.assignment_id.assignment_id),
+                "patient_id": str(appointment.patient_id.id),
+                "doctor_id": str(appointment.user_id.id),
                 "blood_pressure": appointment.blood_pressure,
                 "weight": appointment.weight,
                 "body_temp": appointment.body_temp,
-                "health_condition": appointment.health_conditon,
+                "apponitment_reason": appointment.apponitment_reason,
                 "ready": appointment.ready,
                 "appointment_sch": appointment.appointment_sch,
                 "added_date": appointment.added_date,
