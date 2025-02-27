@@ -8,7 +8,5 @@ urlpatterns = [
     path('patient_register/', PatientRegisterView.as_view(), name='patient_register'),
     path('fetch_doctors/', FetchDoctorsView.as_view(), name='fetch_doctors'),
     path('book_appointment/', BookAppointmentView.as_view(), name='book_appointment'),
-    path('fetch_patient_name/', FetchPatientNameView.as_view(), name='fetch_patient_name'),
-    
-
+    path('fetch_patient_name/', FetchPatientNameView.as_view(), name='fetch_patient_name')
 ]
