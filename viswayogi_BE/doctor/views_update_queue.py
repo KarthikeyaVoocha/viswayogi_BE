@@ -13,8 +13,6 @@ class UpdateQueueView(APIView):
     """
     Updates an appointment and broadcasts the updated queue.
     """
-
-    @authenticate_user_session
     def post(self, request):
 
         payload = request.data.get('payload', {})
