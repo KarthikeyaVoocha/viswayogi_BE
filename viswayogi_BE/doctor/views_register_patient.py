@@ -37,10 +37,10 @@ class PatientRegisterView(APIView):
                         "sex": openapi.Schema(type=openapi.TYPE_STRING, description="sex of patient"),
                         "dob": openapi.Schema(type=openapi.FORMAT_DATETIME, description="date of birth of patient"),
                         "health_info": openapi.Schema(type=openapi.TYPE_STRING, description="health information"),
-                        "phone_no": openapi.Schema(type=openapi.TYPE_STRING, description="Phone number"),
+                        "patient_phone": openapi.Schema(type=openapi.TYPE_STRING, description="Phone number"),
                         "address": openapi.Schema(type=openapi.TYPE_STRING, description="address of the patient"),
                     },
-                    required=["full_name", "email_id", "phone_no", "address","sex","dob","health_info"],
+                    required=["full_name", "email_id", "patient_phone", "address","sex","dob","health_info"],
                 ),
             },
             required=["auth_params","payload"],  # `payload` is required
@@ -59,7 +59,7 @@ class PatientRegisterView(APIView):
                                 "user_id": openapi.Schema(type=openapi.TYPE_STRING, description="User ID"),
                                 "full_name": openapi.Schema(type=openapi.TYPE_STRING, description="Full name"),
                                 "email_id": openapi.Schema(type=openapi.TYPE_STRING, description="User email address"),
-                                "phone_no": openapi.Schema(type=openapi.TYPE_STRING, description="Phone number"),
+                                "patient_phone": openapi.Schema(type=openapi.TYPE_STRING, description="Phone number"),
                                 "added_date": openapi.Schema(type=openapi.FORMAT_DATETIME, description="Creation date"),
                             },
                         ),
@@ -74,7 +74,7 @@ class PatientRegisterView(APIView):
         payload = request.data.get('payload', {})
         full_name = payload.get('full_name')
         email_id = payload.get('email_id')
-        phone_no = payload.get('phone_no')
+        phone_no = payload.get('patient_phone')
         address = payload.get('address')
         sex = payload.get('sex')
         dob = payload.get('dob')
