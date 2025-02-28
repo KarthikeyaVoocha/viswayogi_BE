@@ -13,6 +13,8 @@ class UpdateQueueView(APIView):
     """
     Updates an appointment and broadcasts the updated queue.
     """
+
+    @authenticate_user_session
     def post(self, request):
 
         payload = request.data.get('payload', {})
@@ -35,14 +37,14 @@ class UpdateQueueView(APIView):
             )
 
             # ✅ Send real-time update to WebSocket group
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                "queue_updates",  # WebSocket group name
-                {
-                    "type": "send_queue_update",
-                    "queue_data": updated_queue,
-                },
-            )
+            # channel_layer = get_channel_layer()
+            # async_to_sync(channel_layer.group_send)(
+            #     "queue_updates",  # WebSocket group name
+            #     {
+            #         "type": "send_queue_update",
+            #         "queue_data": updated_queue,
+            #     },
+            # )
 
             return Response(
                 {"message": "Appointment updated", "appointment": serializer.data},
