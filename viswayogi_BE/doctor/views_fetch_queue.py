@@ -7,14 +7,16 @@ from .models import Appointment,PatientProfile
 from user_profile.models import UserProfile
 from .serializers import AppointmentSerializer
 from user_profile.decorators import authenticate_user_session
+from django.db.models import F
+
 
 HEADER_PARAMS = {
     'access_token': openapi.Parameter('accesstoken', openapi.IN_HEADER, description="Local header param", type=openapi.TYPE_STRING),
 }
 
-class BookAppointmentView(APIView):
+class FetchQueueView(APIView):
     @swagger_auto_schema(
-        operation_description="To book an appointment for a patient.",
+        operation_description="To fetch the appointment queue.",
         manual_parameters=[HEADER_PARAMS['access_token']],
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -31,16 +33,9 @@ class BookAppointmentView(APIView):
                     type=openapi.TYPE_OBJECT,
                     description="Appointment details",
                     properties={
-                        "patient_phone": openapi.Schema(type=openapi.TYPE_STRING, description="phone number"),
-                        "doctor_id": openapi.Schema(type=openapi.TYPE_STRING, description="doctor id"),
-                        "blood_pressure": openapi.Schema(type=openapi.TYPE_STRING, description="Blood pressure reading"),
-                        "weight": openapi.Schema(type=openapi.TYPE_STRING, description="Weight of the patient"),
-                        "body_temp": openapi.Schema(type=openapi.TYPE_STRING, description="Body temperature"),
-                        "health_condition": openapi.Schema(type=openapi.TYPE_STRING, description="Health condition details"),
-                        "ready": openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Is the appointment ready?"),
-                        "appointment_sch": openapi.Schema(type=openapi.FORMAT_DATETIME, description="Scheduled appointment time"),
+                        "doctor_id": openapi.Schema(type=openapi.TYPE_STRING, description="doctor id")
                     },
-                    required=["assignment_id", "blood_pressure", "weight", "body_temp", "health_condition", "ready", "appointment_sch"],
+                    required=["doctor_id"],
                 ),
             },
             required=["auth_params", "payload"],
@@ -77,16 +72,10 @@ class BookAppointmentView(APIView):
     @authenticate_user_session
     def post(self, request):
         payload = request.data.get('payload', {})
-        patient_phone = payload.get('patient_phone')
         doctor_id = payload.get('doctor_id')
-        blood_pressure = payload.get('blood_pressure')
-        weight = payload.get('weight')
-        body_temp = payload.get('body_temp')
-        apponitment_reason = payload.get('health_condition')
-        ready = payload.get('ready')
-        appointment_sch = payload.get('appointment_sch')
+        
 
-        if not all([patient_phone, doctor_id, blood_pressure, weight, body_temp, apponitment_reason, ready is not None, appointment_sch]):
+        if not all([doctor_id]):
             return Response(
                 {"error": "All fields are required."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -94,50 +83,22 @@ class BookAppointmentView(APIView):
 
         try:
             # Assuming PatientProfile and UserProfile are linked to patient_phone and doctor_id
-            patient = PatientProfile.objects.get(phone=patient_phone)
             doctor = UserProfile.objects.get(user_id=doctor_id)
-        except PatientProfile.DoesNotExist:
-            return Response(
-                {"error": "Patient with the given phone number does not exist."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except UserProfile.DoesNotExist:
+        except doctor.DoesNotExist:
             return Response(
                 {"error": "Doctor with the given ID does not exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        appointment_data = {
-            "patient_id": patient.patient_id,
-            "user_id": doctor.user_id,
-            "blood_pressure": blood_pressure,
-            "weight": weight,
-            "body_temp": body_temp,
-            "apponitment_reason": apponitment_reason,
-            "ready": ready,
-            "appointment_sch": appointment_sch,
-        }
+        queue = list(
+            Appointment.objects.filter(done=False)  # ✅ Exclude completed appointments
+            .order_by(F("ready").desc(), "appointment_sch")  # ✅ Ready first, then sort by time
+            .values()
+        )
 
-        serializer = AppointmentSerializer(data=appointment_data)
-        if serializer.is_valid():
-            appointment = serializer.save()
+        
 
-            response_data = {
-                "appointment_id": str(appointment.appointment_id),
-                "patient_id": str(appointment.patient_id.id),
-                "doctor_id": str(appointment.user_id.id),
-                "blood_pressure": appointment.blood_pressure,
-                "weight": appointment.weight,
-                "body_temp": appointment.body_temp,
-                "apponitment_reason": appointment.apponitment_reason,
-                "ready": appointment.ready,
-                "appointment_sch": appointment.appointment_sch,
-                "added_date": appointment.added_date,
-            }
-
-            return Response(
-                {"message": "Appointment booked successfully", "appointment_data": response_data},
-                status=status.HTTP_201_CREATED,
-            )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"message": "Appointment queue", "appointment_data": queue},
+            status=status.HTTP_201_CREATED,
+        )

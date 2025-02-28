@@ -39,6 +39,8 @@ class Appointment(models.Model):
     body_temp = models.CharField(max_length=15, null=False)
     apponitment_reason = models.CharField(max_length=2000, null=True)
     appointment_sch = models.DateTimeField(auto_now_add=True)
+    prescription = models.TextField(null=True)
+    diagnosis = models.TextField(null=True)
     ready = models.BooleanField()
     done = models.BooleanField(default=False)
     added_date = models.DateTimeField(auto_now_add=True)

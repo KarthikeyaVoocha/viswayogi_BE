@@ -41,7 +41,7 @@ SECRET_KEY = 'django-insecure-b=#^(y03*4+69fvmg*3hc%0bf*6pvts7)gd)v7wsa3&*c#-7no
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.60.200.186', 'localhost', '51.21.150.1']
+ALLOWED_HOSTS = ['13.60.200.186', 'localhost', '51.21.150.1','127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_yasg',  # For Swagger
+    'channels',
     'user_profile',
     'doctor'   # Add your app name here
 ]
@@ -117,6 +118,14 @@ TEMPLATES = [
 
 
 WSGI_APPLICATION = 'viswayogi_BE.wsgi.application'
+
+ASGI_APPLICATION = 'viswayogi_BE.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",  # Use Redis in production
+    },
+}
 
 
 # Database
