@@ -94,7 +94,7 @@ class BookAppointmentView(APIView):
 
         try:
             # Assuming PatientProfile and UserProfile are linked to patient_phone and doctor_id
-            patient = PatientProfile.objects.get(phone=patient_phone)
+            patient = PatientProfile.objects.get(phone_no=patient_phone)
             doctor = UserProfile.objects.get(user_id=doctor_id)
         except PatientProfile.DoesNotExist:
             return Response(
