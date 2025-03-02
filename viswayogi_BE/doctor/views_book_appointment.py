@@ -123,9 +123,9 @@ class BookAppointmentView(APIView):
             appointment = serializer.save()
 
             response_data = {
-                "appointment_id": str(appointment.appointment_id),
-                "patient_id": str(appointment.patient_id),
-                "doctor_id": str(appointment.user_id),
+                # "appointment_id": str(appointment.appointment_id),
+                # "patient_id": str(appointment.patient_id),
+                # "doctor_id": str(appointment.user_id),
                 "blood_pressure": appointment.blood_pressure,
                 "weight": appointment.weight,
                 "body_temp": appointment.body_temp,
