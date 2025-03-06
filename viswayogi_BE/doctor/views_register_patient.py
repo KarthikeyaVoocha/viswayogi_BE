@@ -40,7 +40,6 @@ class PatientRegisterView(APIView):
                         "patient_phone": openapi.Schema(type=openapi.TYPE_STRING, description="Phone number"),
                         "address": openapi.Schema(type=openapi.TYPE_STRING, description="address of the patient"),
                     },
-                    required=["full_name", "email_id", "patient_phone", "address","sex","dob","health_info"],
                 ),
             },
             required=["auth_params","payload"],  # `payload` is required

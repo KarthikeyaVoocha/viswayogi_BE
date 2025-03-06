@@ -121,11 +121,7 @@ WSGI_APPLICATION = 'viswayogi_BE.wsgi.application'
 
 ASGI_APPLICATION = 'viswayogi_BE.asgi.application'
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",  # Use Redis in production
-    },
-}
+
 
 
 # Database
