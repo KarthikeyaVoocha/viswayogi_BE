@@ -91,10 +91,11 @@ class FetchQueueView(APIView):
             )
 
         queue = list(
-            Appointment.objects.filter(done=False)  # ✅ Exclude completed appointments
+            Appointment.objects.filter(done=False, user_id=doctor_id)  # ✅ Filter by doctor ID
             .order_by(F("ready").desc(), "appointment_sch")  # ✅ Ready first, then sort by time
             .values()
         )
+
 
         
 
