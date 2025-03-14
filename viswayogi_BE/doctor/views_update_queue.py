@@ -34,6 +34,7 @@ class UpdateQueueView(APIView):
                     type=openapi.TYPE_OBJECT,
                     description="Appointment details",
                     properties={
+                        "appointment_id": openapi.Schema(type=openapi.TYPE_STRING, description="Appointment ID"),
                         "patient_phone": openapi.Schema(type=openapi.TYPE_STRING, description="phone number"),
                         "doctor_id": openapi.Schema(type=openapi.TYPE_STRING, description="doctor id"),
                         "blood_pressure": openapi.Schema(type=openapi.TYPE_STRING, description="Blood pressure reading"),
