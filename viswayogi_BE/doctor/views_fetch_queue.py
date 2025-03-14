@@ -90,11 +90,34 @@ class FetchQueueView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        from django.db.models import F
+
         queue = list(
-            Appointment.objects.filter(done=False, user_id=doctor_id)  # ✅ Filter by doctor ID
-            .order_by(F("ready").desc(), "appointment_sch")  # ✅ Ready first, then sort by time
-            .values()
+            Appointment.objects.filter(done=False, user_id=doctor_id)
+            .order_by(F("ready").desc(), "appointment_sch")
+            .select_related("patient_id")  # Join with PatientProfile
+            .values(
+                "appointment_id",
+                "user_id",
+                "patient_id",  
+                "appointment_sch",
+                "ready",
+                "blood_pressure",
+                "weight",
+                "body_temp",
+                "apponitment_reason",
+                "patient_id__full_name",
+                "patient_id__email_id",
+                "patient_id__Sex",
+                "patient_id__DOB",
+                "patient_id__Health_info",
+                "patient_id__phone_no",
+                "patient_id__phone_code",
+                "patient_id__address",
+                "patient_id__status__status_name",  # Fetch patient status
+            )
         )
+
 
 
         
