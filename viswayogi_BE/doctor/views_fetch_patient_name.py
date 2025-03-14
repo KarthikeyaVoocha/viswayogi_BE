@@ -75,7 +75,7 @@ class FetchPatientNameView(APIView):
             )
 
         try:
-            patient = PatientProfile.objects.get(phone=phone_number)
+            patient = PatientProfile.objects.get(phone_no=phone_number)
         except PatientProfile.DoesNotExist:
             return Response(
                 {"error": "Patient with the given phone number does not exist."},
