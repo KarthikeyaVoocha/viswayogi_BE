@@ -35,19 +35,9 @@ class UpdateQueueView(APIView):
                     description="Appointment details",
                     properties={
                         "appointment_id": openapi.Schema(type=openapi.TYPE_STRING, description="Appointment ID"),
-                        "patient_phone": openapi.Schema(type=openapi.TYPE_STRING, description="phone number"),
-                        "doctor_id": openapi.Schema(type=openapi.TYPE_STRING, description="doctor id"),
-                        "blood_pressure": openapi.Schema(type=openapi.TYPE_STRING, description="Blood pressure reading"),
-                        "weight": openapi.Schema(type=openapi.TYPE_STRING, description="Weight of the patient"),
-                        "body_temp": openapi.Schema(type=openapi.TYPE_STRING, description="Body temperature"),
-                        "health_condition": openapi.Schema(type=openapi.TYPE_STRING, description="Health condition details"),
-                        "prescription": openapi.Schema(type=openapi.TYPE_STRING, description="Health condition details"),
-                        "diagnosis": openapi.Schema(type=openapi.TYPE_STRING, description="Health condition details"),
-                        "ready": openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Is the appointment ready?"),
                         "done": openapi.Schema(type=openapi.TYPE_BOOLEAN, description="Is the appointment ready?"),
-                        "appointment_sch": openapi.Schema(type=openapi.FORMAT_DATETIME, description="Scheduled appointment time"),
                     },
-                    required=["assignment_id", "blood_pressure", "weight", "body_temp", "health_condition", "ready", "appointment_sch"],
+                    required=["assignment_id", "done"],
                 ),
             },
             required=["auth_params", "payload"],
@@ -86,13 +76,13 @@ class UpdateQueueView(APIView):
 
         payload = request.data.get('payload', {})
         appointment_id = payload.get('appointment_id')
-        data = payload.get('data')
+        done = payload.get('done')
         try:
             appointment = Appointment.objects.get(appointment_id=appointment_id)
         except Appointment.DoesNotExist:
             return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = AppointmentSerializer(appointment, data=data, partial=True)
+        serializer = AppointmentSerializer(appointment, data={"done": done}, partial=True)
         if serializer.is_valid():
             serializer.save()
 
