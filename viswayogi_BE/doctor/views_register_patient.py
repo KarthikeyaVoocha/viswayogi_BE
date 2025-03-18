@@ -33,7 +33,6 @@ class PatientRegisterView(APIView):
                     description="User registration details",
                     properties={
                         "full_name": openapi.Schema(type=openapi.TYPE_STRING, description="Full name of the user"),
-                        "email_id": openapi.Schema(type=openapi.TYPE_STRING, description="User email address"),
                         "sex": openapi.Schema(type=openapi.TYPE_STRING, description="sex of patient"),
                         "dob": openapi.Schema(type=openapi.FORMAT_DATETIME, description="date of birth of patient"),
                         "health_info": openapi.Schema(type=openapi.TYPE_STRING, description="health information"),
@@ -72,14 +71,13 @@ class PatientRegisterView(APIView):
     def post(self, request):
         payload = request.data.get('payload', {})
         full_name = payload.get('full_name')
-        email_id = payload.get('email_id')
         phone_no = payload.get('patient_phone')
         address = payload.get('address')
         sex = payload.get('sex')
         dob = payload.get('dob')
         health_info = payload.get('health_info')
 
-        if not full_name or not email_id:
+        if not full_name:
             return Response(
                 {"error": "Full name, email ID, and password are required in the payload."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -89,7 +87,6 @@ class PatientRegisterView(APIView):
         serializer = PatientProfileSerializer(
             data={
                 "full_name": full_name,
-                "email_id": email_id,
                 "phone_no": phone_no,
                 "address": address,
                 "Sex": sex,
@@ -102,7 +99,6 @@ class PatientRegisterView(APIView):
 
             user_data = {
                 "full_name": full_name,
-                "email_id": email_id,
                 "phone_no": phone_no,
                 "address": address
             }

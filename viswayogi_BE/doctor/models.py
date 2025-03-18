@@ -34,6 +34,7 @@ class Appointment(models.Model):
     appointment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     patient_id = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     user_id = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    room_no = models.CharField(max_length=100, null=True)
     blood_pressure = models.CharField(max_length=15, null=False)
     weight = models.CharField(max_length=15, null=False)
     body_temp = models.CharField(max_length=15, null=False)

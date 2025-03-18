@@ -34,6 +34,7 @@ class BookAppointmentView(APIView):
                         "patient_phone": openapi.Schema(type=openapi.TYPE_STRING, description="phone number"),
                         "doctor_id": openapi.Schema(type=openapi.TYPE_STRING, description="doctor id"),
                         "blood_pressure": openapi.Schema(type=openapi.TYPE_STRING, description="Blood pressure reading"),
+                        "room_no": openapi.Schema(type=openapi.TYPE_STRING, description="room_no"),
                         "weight": openapi.Schema(type=openapi.TYPE_STRING, description="Weight of the patient"),
                         "body_temp": openapi.Schema(type=openapi.TYPE_STRING, description="Body temperature"),
                         "health_condition": openapi.Schema(type=openapi.TYPE_STRING, description="Health condition details"),
@@ -84,6 +85,7 @@ class BookAppointmentView(APIView):
         body_temp = payload.get('body_temp')
         apponitment_reason = payload.get('health_condition')
         ready = payload.get('ready')
+        room_no = payload.get('room_no')
         appointment_sch = payload.get('appointment_sch')
 
         if not all([patient_phone, doctor_id, blood_pressure, weight, body_temp, apponitment_reason, ready is not None, appointment_sch]):
@@ -116,6 +118,7 @@ class BookAppointmentView(APIView):
             "apponitment_reason": apponitment_reason,
             "ready": ready,
             "appointment_sch": appointment_sch,
+            "room_no":room_no
         }
 
         serializer = AppointmentSerializer(data=appointment_data)
