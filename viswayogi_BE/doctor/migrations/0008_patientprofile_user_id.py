@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='patientprofile',
             name='user_id',
-            field=models.ForeignKey(default='fa0928af-9ced-4181-8527-45aa5a1fa44b', on_delete=django.db.models.deletion.CASCADE, to='user_profile.userprofile'),
+            field=models.ForeignKey(default='33792d63-fab2-44f1-b3cc-06fe4d9760ac', on_delete=django.db.models.deletion.CASCADE, to='user_profile.userprofile'),
             preserve_default=False,
         ),
     ]
