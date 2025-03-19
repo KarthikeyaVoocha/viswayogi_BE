@@ -14,6 +14,7 @@ class PatientProfileStatus(models.Model):
 
 class PatientProfile(models.Model):
     patient_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user_id = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=100, null=True)
     email_id = models.EmailField(max_length=100, null=True)
     Sex = models.CharField(max_length=100, null=False)

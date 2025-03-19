@@ -5,6 +5,9 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .models import PatientProfile
 from user_profile.decorators import authenticate_user_session
+from user_profile.models import UserProfile
+from django.utils.timezone import now
+from django.db.models import Count
 
 HEADER_PARAMS = {
     'access_token': openapi.Parameter('accesstoken', openapi.IN_HEADER, description="local header param", type=openapi.TYPE_STRING),
@@ -63,20 +66,43 @@ class FetchPatientsView(APIView):
     )
     @authenticate_user_session
     def post(self, request):
-        payload = request.data.get('payload', {})
-
-
         try:
-            patient = PatientProfile.objects.all()  # Returns a QuerySet with all objects
-        except PatientProfile.DoesNotExist:
-            return Response(
-                {"error": "Patient with the given phone number does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            doctors = UserProfile.objects.filter(role="doctor").values('designation', 'user_id')
 
-        response_data = {
-            "message": "Patient name retrieved successfully",
-            "patients": patient,
-        }
+            designation_counts = {}
 
-        return Response(response_data, status=status.HTTP_200_OK)
+            for doctor in doctors:
+                designation = doctor["designation"]
+                if designation not in designation_counts:
+                    designation_counts[designation] = {"daily": 0, "monthly": 0, "yearly": 0}
+
+                # Count patients added under this doctor for today
+                daily_count = PatientProfile.objects.filter(
+                    user_id=doctor["user_id"], 
+                    added_date__date=now().date()
+                ).count()
+
+                # Count patients added under this doctor for this month
+                monthly_count = PatientProfile.objects.filter(
+                    user_id=doctor["user_id"], 
+                    added_date__month=now().month,
+                    added_date__year=now().year
+                ).count()
+
+                # Count patients added under this doctor for this year
+                yearly_count = PatientProfile.objects.filter(
+                    user_id=doctor["user_id"], 
+                    added_date__year=now().year
+                ).count()
+
+                # Update the designation counts
+                designation_counts[designation]["daily"] += daily_count
+                designation_counts[designation]["monthly"] += monthly_count
+                designation_counts[designation]["yearly"] += yearly_count
+
+
+
+            return Response(designation_counts, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({"success": False, "error": str(e)}, status=500)
