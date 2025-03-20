@@ -118,7 +118,7 @@ class BookAppointmentView(APIView):
             "apponitment_reason": apponitment_reason,
             "ready": ready,
             "appointment_sch": appointment_sch,
-            "room_no":room_no
+            "room_num":room_no
         }
 
         serializer = AppointmentSerializer(data=appointment_data)
