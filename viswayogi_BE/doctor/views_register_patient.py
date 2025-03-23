@@ -38,7 +38,7 @@ class PatientRegisterView(APIView):
                         "health_info": openapi.Schema(type=openapi.TYPE_STRING, description="health information"),
                         "patient_phone": openapi.Schema(type=openapi.TYPE_STRING, description="Phone number"),
                         "address": openapi.Schema(type=openapi.TYPE_STRING, description="address of the patient"),
-                        "user_id":openapi.Schema(type=openapi.TYPE_STRING, description="doctor id"),
+                        "doctor_id":openapi.Schema(type=openapi.TYPE_STRING, description="doctor id"),
                     },
                 ),
             },
@@ -77,7 +77,7 @@ class PatientRegisterView(APIView):
         sex = payload.get('sex')
         dob = payload.get('dob')
         health_info = payload.get('health_info')
-        user_id = payload.get('user_id')
+        user_id = payload.get('doctor_id')
 
         if not full_name:
             return Response(
