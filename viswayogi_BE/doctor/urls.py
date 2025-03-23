@@ -7,6 +7,7 @@ from .views_fetch_queue import FetchQueueView
 from .views_update_queue import UpdateQueueView
 from .views_update_prescription import UpdatePresView
 from .views_fetch_patients import FetchPatientsView
+from .views_pat_count_day import FetchPatCountView
 
 urlpatterns = [
     path('patient_register/', PatientRegisterView.as_view(), name='patient_register'),
@@ -17,5 +18,6 @@ urlpatterns = [
     path('update_queue/', UpdateQueueView.as_view(), name='update_queue'),
     path('update_prescription/', UpdatePresView.as_view(), name='update_prescription'),
     path('fetch_patients/', FetchPatientsView.as_view(), name='fetch_patients'),
+    path('pat_count/', FetchPatCountView.as_view(), name='pat_count'),
 
 ]
