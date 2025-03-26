@@ -8,8 +8,9 @@ from user_profile.models import UserProfile
 from .serializers import AppointmentSerializer
 from user_profile.decorators import authenticate_user_session
 from django.db.models import F
-from django.db.models import Count, Case, When, IntegerField, DateField
+from django.db.models import Count, Case, When, IntegerField, Value
 from django.db.models.functions import TruncDate
+from django.db import models
 
 
 HEADER_PARAMS = {
@@ -95,12 +96,23 @@ class FetchPatCountView(APIView):
 
         daily_stats = (
             Appointment.objects.filter(user_id=doctor_id)  # Filter by doctor
+            .select_related("patient_id")  # Join with PatientProfile table
             .annotate(registration_date=TruncDate("appointment_sch"))  # Extract date
-            .values("registration_date")
+            .values(
+                "registration_date",
+                "patient_id",  
+                "patient_id__full_name",  # Fetch patient's name from PatientProfile
+            )
             .annotate(
                 total_patients=Count("appointment_id"),
                 done_count=Count(Case(When(done=True, then=1), output_field=IntegerField())),
                 not_done_count=Count(Case(When(done=False, then=1), output_field=IntegerField())),
+                status=Case(  # Appointment status field
+                    When(done=True, then=Value("Completed")),
+                    When(done=False, then=Value("Pending")),
+                    default=Value("Unknown"),
+                    output_field=models.CharField(),
+                ),
             )
             .order_by("-registration_date")  # Latest first
         )
