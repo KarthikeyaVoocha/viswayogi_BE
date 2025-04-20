@@ -31,9 +31,13 @@ class FetchPatientsView(APIView):
                 ),
                 "payload": openapi.Schema(
                     type=openapi.TYPE_OBJECT,
-                    description="payload for fetching patient name",
+                    description="Appointment details",
                     properties={
+                        "date": openapi.Schema(type=openapi.TYPE_STRING, description="date"),
+                        "month": openapi.Schema(type=openapi.TYPE_STRING, description="month"),
+                        "year": openapi.Schema(type=openapi.TYPE_STRING, description="year")
                     },
+                    required=[],
                 ),
             },
             required=["auth_params", "payload"],
@@ -66,43 +70,43 @@ class FetchPatientsView(APIView):
     )
     @authenticate_user_session
     def post(self, request):
-        try:
-            doctors = UserProfile.objects.filter(role="doctor").values('designation', 'user_id')
+            try:
+                # Get parameters from request (GET or POST as per your API)
+                payload = request.data.get('payload', {})
+                date = payload.get('date')      # Format: YYYY-MM-DD
+                month = payload.get('month')    # Format: 1 to 12
+                year = payload.get('year')      # Format: YYYY
 
-            designation_counts = {}
+                # Filter all doctors
+                doctors = UserProfile.objects.filter(role="doctor").values('designation', 'user_id')
+                designation_counts = {}
 
-            for doctor in doctors:
-                designation = doctor["designation"]
-                if designation not in designation_counts:
-                    designation_counts[designation] = {"daily": 0, "monthly": 0, "yearly": 0}
+                for doctor in doctors:
+                    designation = doctor["designation"]
+                    if designation not in designation_counts:
+                        designation_counts[designation] = 0
 
-                # Count patients added under this doctor for today
-                daily_count = PatientProfile.objects.filter(
-                    user_id=doctor["user_id"], 
-                    added_date__date=now().date()
-                ).count()
+                    # Base queryset
+                    queryset = PatientProfile.objects.filter(user_id=doctor["user_id"])
 
-                # Count patients added under this doctor for this month
-                monthly_count = PatientProfile.objects.filter(
-                    user_id=doctor["user_id"], 
-                    added_date__month=now().month,
-                    added_date__year=now().year
-                ).count()
+                    # Filter logic based on input
+                    if date:
+                        queryset = queryset.filter(added_date__date=date)
+                    elif month and year:
+                        queryset = queryset.filter(
+                            added_date__month=int(month),
+                            added_date__year=int(year)
+                        )
+                    elif year:
+                        queryset = queryset.filter(added_date__year=int(year))
+                    else:
+                        # Default to today's date if nothing is given
+                        queryset = queryset.filter(added_date__date=now().date())
 
-                # Count patients added under this doctor for this year
-                yearly_count = PatientProfile.objects.filter(
-                    user_id=doctor["user_id"], 
-                    added_date__year=now().year
-                ).count()
+                    count = queryset.count()
+                    designation_counts[designation] += count
 
-                # Update the designation counts
-                designation_counts[designation]["daily"] += daily_count
-                designation_counts[designation]["monthly"] += monthly_count
-                designation_counts[designation]["yearly"] += yearly_count
+                return Response(designation_counts, status=status.HTTP_200_OK)
 
-
-
-            return Response(designation_counts, status=status.HTTP_200_OK)
-        
-        except Exception as e:
-            return Response({"success": False, "error": str(e)}, status=500)
+            except Exception as e:
+                return Response({"success": False, "error": str(e)}, status=500)
