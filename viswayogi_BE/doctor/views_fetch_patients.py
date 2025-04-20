@@ -8,6 +8,8 @@ from user_profile.decorators import authenticate_user_session
 from user_profile.models import UserProfile
 from django.utils.timezone import now
 from django.db.models import Count
+from datetime import datetime
+
 
 HEADER_PARAMS = {
     'access_token': openapi.Parameter('accesstoken', openapi.IN_HEADER, description="local header param", type=openapi.TYPE_STRING),
@@ -73,11 +75,37 @@ class FetchPatientsView(APIView):
             try:
                 # Get parameters from request (GET or POST as per your API)
                 payload = request.data.get('payload', {})
-                date = payload.get('date')      # Format: YYYY-MM-DD
-                month = payload.get('month')    # Format: 1 to 12
-                year = payload.get('year')      # Format: YYYY
+                day_str = payload.get('date')      # Format: YYYY-MM-DD
+                month_str = payload.get('month')    # Format: 1 to 12
+                year_str = payload.get('year')      # Format: YYYY
 
-                # Filter all doctors
+
+                # Convert inputs to integers if present
+                day = int(day_str) if day_str else None
+                month = int(month_str) if month_str else None
+                year = int(year_str) if year_str else None
+
+                # Validate and build filtering date logic
+                filter_mode = None
+                filter_date = None
+
+                if day and month and year:
+                    # Full date
+                    try:
+                        filter_date = datetime(year, month, day).date()
+                        filter_mode = "daily"
+                    except ValueError:
+                        return Response({"error": "Invalid day/month/year combination."}, status=400)
+                elif month and year:
+                    filter_mode = "monthly"
+                elif year:
+                    filter_mode = "yearly"
+                else:
+                    # Default to today's date
+                    filter_date = now().date()
+                    filter_mode = "daily"
+
+                # Get all doctors
                 doctors = UserProfile.objects.filter(role="doctor").values('designation', 'user_id')
                 designation_counts = {}
 
@@ -86,25 +114,20 @@ class FetchPatientsView(APIView):
                     if designation not in designation_counts:
                         designation_counts[designation] = 0
 
-                    # Base queryset
                     queryset = PatientProfile.objects.filter(user_id=doctor["user_id"])
 
-                    # Filter logic based on input
-                    if date:
-                        queryset = queryset.filter(added_date__date=date)
-                    elif month and year:
+                    # Apply filter
+                    if filter_mode == "daily":
+                        queryset = queryset.filter(added_date__date=filter_date)
+                    elif filter_mode == "monthly":
                         queryset = queryset.filter(
-                            added_date__month=int(month),
-                            added_date__year=int(year)
+                            added_date__month=month,
+                            added_date__year=year
                         )
-                    elif year:
-                        queryset = queryset.filter(added_date__year=int(year))
-                    else:
-                        # Default to today's date if nothing is given
-                        queryset = queryset.filter(added_date__date=now().date())
+                    elif filter_mode == "yearly":
+                        queryset = queryset.filter(added_date__year=year)
 
-                    count = queryset.count()
-                    designation_counts[designation] += count
+                    designation_counts[designation] += queryset.count()
 
                 return Response(designation_counts, status=status.HTTP_200_OK)
 
